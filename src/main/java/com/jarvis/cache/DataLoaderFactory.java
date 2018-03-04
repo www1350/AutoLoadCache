@@ -30,6 +30,7 @@ public class DataLoaderFactory extends BasePooledObjectFactory<DataLoader> {
         factory=new GenericObjectPool<DataLoader>(this, config, abandonConfig);
     }
 
+    //DCL
     public static DataLoaderFactory getInstance() {
         if(null == instance) {
             synchronized(DataLoaderFactory.class) {

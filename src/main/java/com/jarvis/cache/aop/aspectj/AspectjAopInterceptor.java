@@ -24,6 +24,12 @@ public class AspectjAopInterceptor {
         this.cacheHandler=cacheHandler;
     }
 
+    /***
+     * 带check 解析 @Cache
+     * @param pjp
+     * @return
+     * @throws Throwable
+     */
     public Object checkAndProceed(ProceedingJoinPoint pjp) throws Throwable {
         Signature signature=pjp.getSignature();
         MethodSignature methodSignature=(MethodSignature)signature;
@@ -40,6 +46,12 @@ public class AspectjAopInterceptor {
         }
     }
 
+    /***
+     * 带check 解析 @CacheDelete
+     * @param jp
+     * @param retVal
+     * @throws Throwable
+     */
     public void checkAndDeleteCache(JoinPoint jp, Object retVal) throws Throwable {
         Signature signature=jp.getSignature();
         MethodSignature methodSignature=(MethodSignature)signature;
@@ -50,6 +62,12 @@ public class AspectjAopInterceptor {
         }
     }
 
+    /***
+     * 带check 解析 @CacheDeleteTransactional
+     * @param pjp
+     * @return
+     * @throws Throwable
+     */
     public Object checkAndDeleteCacheTransactional(ProceedingJoinPoint pjp) throws Throwable {
         Signature signature=pjp.getSignature();
         MethodSignature methodSignature=(MethodSignature)signature;
@@ -65,14 +83,35 @@ public class AspectjAopInterceptor {
         }
     }
 
+    /***
+     * 解析 @Cache
+     * @param aopProxyChain
+     * @param cache
+     * @return
+     * @throws Throwable
+     */
     public Object proceed(ProceedingJoinPoint aopProxyChain, Cache cache) throws Throwable {
         return cacheHandler.proceed(new AspectjCacheAopProxyChain(aopProxyChain), cache);
     }
 
+    /***
+     * 解析 @CacheDelete
+     * @param aopProxyChain
+     * @param cacheDelete
+     * @param retVal
+     * @throws Throwable
+     */
     public void deleteCache(JoinPoint aopProxyChain, CacheDelete cacheDelete, Object retVal) throws Throwable {
         cacheHandler.deleteCache(new AspectjDeleteCacheAopProxyChain(aopProxyChain), cacheDelete, retVal);
     }
 
+    /****
+     * 解析 @CacheDeleteTransactional
+     * @param aopProxyChain
+     * @param cacheDeleteTransactional
+     * @return
+     * @throws Throwable
+     */
     public Object deleteCacheTransactional(ProceedingJoinPoint aopProxyChain, CacheDeleteTransactional cacheDeleteTransactional) throws Throwable {
         return cacheHandler.proceedDeleteCacheTransactional(new AspectjDeleteCacheTransactionalAopProxyChain(aopProxyChain), cacheDeleteTransactional);
     }

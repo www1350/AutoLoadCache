@@ -111,6 +111,7 @@ public class DataLoader {
         }
         Object lock=processing;
         String threadName=Thread.currentThread().getName();
+        //是并发第一个请求，
         if(isFirst) {
             log.trace("{} first thread!", threadName);
             try {
@@ -126,6 +127,7 @@ public class DataLoader {
                 }
             }
         } else {
+            //其他的去内存拿
             doWaitRequest(processing, lock);
         }
         return this;

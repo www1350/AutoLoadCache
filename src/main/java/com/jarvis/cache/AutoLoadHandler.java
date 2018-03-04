@@ -148,6 +148,7 @@ public class AutoLoadHandler {
         if(null == autoLoadMap) {
             return null;
         }
+        //namespace key hfield 都一样的
         AutoLoadTO autoLoadTO=autoLoadMap.get(cacheKey);
         if(null != autoLoadTO) {
             return autoLoadTO;

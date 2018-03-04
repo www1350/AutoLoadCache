@@ -150,8 +150,10 @@ public class CacheHandler {
         CacheOpType opType=getCacheOpType(cache, arguments);
         log.trace("CacheHandler.proceed-->{}.{}--{})" , pjp.getTarget().getClass().getName(), pjp.getMethod().getName(), opType.name());
 
+        //返回从数据源加载数据，只写缓存
         if(opType == CacheOpType.WRITE) {
             return writeOnly(pjp, cache);
+        //只返回从数据源加载数据
         } else if(opType == CacheOpType.LOAD) {
             return getData(pjp);
         }
@@ -160,7 +162,10 @@ public class CacheHandler {
             return getData(pjp);
         }
 
+        //获取key 规则 CacheKey-> (namespace:)className(.method)(getUniqueHashStr(args))
+        //LockKey-> CacheKey(:hfield):lock
         CacheKeyTO cacheKey=getCacheKey(pjp, cache);
+        //
         if(null == cacheKey) {
             return getData(pjp);
         }
@@ -173,10 +178,13 @@ public class CacheHandler {
         }
         log.trace("cache key:{}, cache data is null {} ", cacheKey.getCacheKey(), null == cacheWrapper);
 
+        //只从缓存加载数据
         if(opType == CacheOpType.READ_ONLY) {
             return null == cacheWrapper ? null : cacheWrapper.getCacheObject();
         }
 
+        //没过期,刷autoLoadMap ->作用：
+        // 当缓存即将过期时，去执行DAO的方法，获取数据，并将数据放到缓存中。为了防止自动加载队列过大，设置了容量限制；同时会将超过一定时间没有用户请求的也会从自动加载队列中移除，把服务器资源释放出来，给真正需要的请求。
         if(null != cacheWrapper && !cacheWrapper.isExpired()) {
             AutoLoadTO autoLoadTO=autoLoadHandler.putIfAbsent(cacheKey, pjp, cache, cacheWrapper);
             if(null != autoLoadTO) {// 同步最后加载时间
@@ -194,6 +202,7 @@ public class CacheHandler {
         long loadDataUseTime=0;
         boolean isFirst;
         try {
+            // 如果多个用户同时取一个数据，那么先让第一个请求去DAO取数据，其它请求则等待其返回后，直接从内存中获取，等待一定时间后，如果还没获取到，则会去数据层获取数据。
             newCacheWrapper=dataLoader.init(pjp, cacheKey, cache, this).loadData().getCacheWrapper();
             isFirst=dataLoader.isFirst();
             loadDataUseTime=dataLoader.getLoadDataUseTime();
@@ -204,6 +213,7 @@ public class CacheHandler {
         }
         AutoLoadTO autoLoadTO=null;
 
+        //是并发的第一个，写入缓存
         if(isFirst) {
             autoLoadTO=autoLoadHandler.putIfAbsent(cacheKey, pjp, cache, newCacheWrapper);
             try {

@@ -56,6 +56,7 @@ public class JedisClusterCacheManager implements ICacheManager {
             int expire=result.getExpire();
             String hfield=cacheKeyTO.getHfield();
             if(null == hfield || hfield.length() == 0) {
+                //永久缓存
                 if(expire == 0) {
                     jedisCluster.set(KEY_SERIALIZER.serialize(cacheKey), serializer.serialize(result));
                 } else if(expire > 0) {
